@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daughters of Divine Love Juniorate Abakpa – Registration</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: auto;
+      background: #60b4ec;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    h3 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    form > div {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:disabled {
+      background-color: #999;
+    }
+
+    .success {
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .admin-section {
+      display: none;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px dashed #ccc;
+    }
+
+    .download-btn {
+      background-color: #28a745;
+      margin-left: 10px;
+    }
+
+    .admin-input {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .admin-input input {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .admin-input {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Daughters of Divine Love Juniorate<br>Abakpa, Enugu</h1>
+    <h3>2025/2026 Academic Year Entrance Examination Form<br>May 24 2025</h3>
+
+    <form id="regForm">
+      <div><label>Full Name*</label><input type="text" name="Full Name" required /></div>
+      <div><label>Date of Birth*</label><input type="date" name="Date of Birth" required /></div>
+      <div>
+        <label>Gender*</label>
+        <select name="Gender" required>
+          <option value="">Select...</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div><label>Address*</label><textarea name="Address" required></textarea></div>
+      <div><label>Parent/Guardian Name*</label><input type="text" name="Parent Name" required /></div>
+      <div><label>Parent/Guardian Contact Number*</label><input type="tel" name="Parent Contact" required /></div>
+      <div><label>Applicant Contact Number</label><input type="tel" name="Applicant Contact" /></div>
+      <div><label>Previous School Attended</label><input type="text" name="Previous School" /></div>
+      <div><label>Last Class Attended</label><input type="text" name="Class Attended" /></div>
+      <div><label>is there any health challenge?</label><input type="text" name="Health challenge" /></div>
+      
+      <div><label>Additional Comments</label><textarea name="Comments"></textarea></div>
+      <button type="submit" id="submitBtn">Submit</button>
+    </form>
+
+    <p class="success" id="successMessage" style="display:none;">Form submitted successfully!</p>
+
+    <div class="admin-section" id="adminSection">
+      <p><strong>Admin Access Required to Download:</strong></p>
+      <div class="admin-input">
+        <input type="password" id="adminPassword" placeholder="Enter admin password" />
+        <button id="verifyAdminBtn">Verify</button>
+      </div>
+      <button id="downloadBtn" class="download-btn" style="display:none;">Download CSV</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('regForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMessage');
+    const adminSection = document.getElementById('adminSection');
+    const adminPassword = document.getElementById('adminPassword');
+    const verifyAdminBtn = document.getElementById('verifyAdminBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    const submittedData = [];
+    const ADMIN_KEY = 'admin123'; // Change this to your preferred admin password
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      const entry = {};
+      formData.forEach((value, key) => {
+        entry[key] = value;
+      });
+
+      submittedData.push(entry);
+
+      successMsg.style.display = 'block';
+      adminSection.style.display = 'block';
+      form.reset();
+      submitBtn.disabled = false;
+    });
+
+    verifyAdminBtn.addEventListener('click', () => {
+      if (adminPassword.value === ADMIN_KEY) {
+        downloadBtn.style.display = 'inline-block';
+        adminPassword.disabled = true;
+        verifyAdminBtn.disabled = true;
+      } else {
+        alert('Incorrect admin password.');
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (submittedData.length === 0) return;
+
+      const headers = Object.keys(submittedData[0]);
+      const csvRows = [
+        headers.join(','),
+        ...submittedData.map(row => headers.map(field => `"${(row[field] || '').replace(/"/g, '""')}"`).join(','))
+      ];
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'registrations.csv';
+      a.click();
+    });
+  </script>
+</body>
+</html>
